@@ -3,14 +3,14 @@
 local YWATER = 1
 local YSAND = 4
 local YTERCEN = 0
-local TERSCA = 384
+local TERSCA = 256
 local BASAMP = 0.2
 
-local TSTONE = 0.02
-local TRIVER = 0.007
-local VALAMP = 0.33
-local VALEXP = 1
-local RIVAMP = 1.5
+local TSTONE = 0.01
+local TRIVER = 0.01
+local VALAMP = 100
+local VALEXP = 2
+local RIVAMP = 1
 
 -- Noise parameters
 
@@ -159,7 +159,7 @@ minetest.register_on_generated(function(minp, maxp, seed)
 				local n_base = nvals_base[ni2d]
 				local blend = math.min(math.max(n_base * 3 - 1, 0), 1)
 				local triver = TRIVER * (1 - blend * 0.5)
-				local valamp = VALAMP
+				local valamp = VALAMP * (1 - blend * 0.8)
 				local valexp = VALEXP
 
 				local n_valleylo = nvals_valleylo[ni2d]
@@ -173,8 +173,9 @@ minetest.register_on_generated(function(minp, maxp, seed)
 				local grad = (YTERCEN - y) / TERSCA
 				local densitybase = n_base * BASAMP + grad
 				local densityval = math.abs(n_valleymix * n_valleymix2) - triver
-				if densityval > 0 then -- valley shape
-					densityval = densityval ^ valexp * valamp
+				if densityval > 0 then
+					densityval = math.min(densityval ^ valexp * valamp,
+							0.4 + blend)
 				else -- river channel shape
 					densityval = densityval * RIVAMP
 				end
